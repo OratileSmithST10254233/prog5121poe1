@@ -130,5 +130,11 @@ public class LoginTest {
             "Username or password incorrect, please try again.",
             login.returnLoginStatus("kyl_1", "WrongPassword1!")
         );
+    }    
+
+            @Test
+    public void testUsernameNullReturnsFalse() {
+        assertFalse(login.checkUserName(null));
+    
     }
 }
