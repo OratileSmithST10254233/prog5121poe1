@@ -43,6 +43,7 @@ public class Login {
         if (password == null || password.length() < 8) {
             return false;
         }
+ 
         boolean hasCapital = Pattern.compile("[A-Z]").matcher(password).find();
         boolean hasNumber = Pattern.compile("[0-9]").matcher(password).find();
         boolean hasSpecialChar = Pattern.compile("[^a-zA-Z0-9]").matcher(password).find();
