@@ -26,4 +26,19 @@ This application is Part 2 of the PROG5121 POE assignment. It extends the Part 1
   - **Message Hash:** Generates a custom hash formatted as `00:0:FIRSTWORDLASTWORD` in uppercase.
   - **Message Actions:** Allows users to Send, Disregard (Delete), or Store messages for later.
 
-## Application Architecture
+### Part 3: Data Arrays, Search & Reporting
+- **Dynamic Array Management:** Populates and manages five parallel/structured arrays without hard-coding[cite: 19]:
+  - `Sent Messages` — stores all sent messages[cite: 19].
+  - `Disregarded Messages` — stores all disregarded messages[cite: 19].
+  - `Stored Messages` — reads stored messages from the saved JSON file into memory[cite: 19].
+  - `Message Hashes` — stores generated hashes for tracking and deletion[cite: 19].
+  - `Message IDs` — stores unique 10-digit message identifiers[cite: 19].
+- **Stored Messages & Reporting Menu:**
+  - Display the sender and recipient of all stored messages[cite: 19].
+  - Identify and display the longest stored/sent message[cite: 17, 19].
+  - Search for a specific **Message ID** and return the corresponding recipient and message[cite: 19].
+  - Search and display all messages sent or stored for a specific recipient number[cite: 17, 19].
+  - Delete a message from the records using its **Message Hash**[cite: 17, 19].
+  - Generate and display a full **Sent Messages Report** listing the Message Hash, Recipient, and Message for all sent items.
+
+---
