@@ -275,4 +275,59 @@ public class Message {
     public String getMessageHash() {
         return messageHash;
     }
-}
+
+    public void setSender(String sender) {
+        this.sender = sender == null ? "" : sender;
+    }
+
+    // ---------------------------------------------------------------
+    // Part 3: the arrays (populated while the program runs)
+    // ---------------------------------------------------------------
+
+    /** Adds this message's ID and hash to the ID and hash arrays (once). */
+    private void track() {
+        if (!tracked) {
+            messageIDs.add(messageID);
+            messageHashes.add(messageHash);
+            tracked = true;
+        }
+    }
+
+    /** Removes this message's ID and hash from the ID and hash arrays. */
+    private void untrack() {
+        if (tracked) {
+            messageIDs.remove(messageID);
+            messageHashes.remove(messageHash);
+            tracked = false;
+        }
+    }
+
+    public static List<String> getSentMessageTexts() {
+        return textsOf(sentMessages);
+    }
+
+    public static List<String> getDisregardedMessageTexts() {
+        return textsOf(disregardedMessages);
+    }
+
+    public static List<String> getStoredMessageTexts() {
+        return textsOf(storedMessages);
+    }
+
+    public static List<String> getMessageHashes() {
+        return Collections.unmodifiableList(new ArrayList<>(messageHashes));
+    }
+
+    public static List<String> getMessageIDs() {
+        return Collections.unmodifiableList(new ArrayList<>(messageIDs));
+    }
+
+    private static List<String> textsOf(List<Message> messages) {
+        List<String> texts = new ArrayList<>();
+        for (Message message : messages) {
+            texts.add(message.messageText);
+        }
+        return texts;
+    }
+
+
