@@ -167,6 +167,84 @@ public class Main {
     }
 
     // ---------------------------------------------------------------
+    // Stored Messages menu (Part 3)
+    // ---------------------------------------------------------------
+
+    private static void storedMessagesMenu() {
+        boolean back = false;
+        while (!back) {
+            System.out.println();
+            System.out.println("--- Stored Messages ---");
+            System.out.println("1) Display the sender and recipient of all stored messages");
+            System.out.println("2) Display the longest stored message");
+            System.out.println("3) Search for a message ID");
+            System.out.println("4) Search for all the messages for a recipient");
+            System.out.println("5) Delete a message using its message hash");
+            System.out.println("6) Display a report of all the stored messages");
+            System.out.println("7) Back to the main menu");
+            int option = readInt("Choose an option: ");
+            System.out.println();
+
+            switch (option) {
+                case 1:
+                    System.out.println(Message.displaySenderAndRecipientOfStored());
+                    break;
+                case 2:
+                    System.out.println(Message.longestStoredMessage());
+                    break;
+                case 3:
+                    System.out.print("Enter the message ID: ");
+                    System.out.println(Message.searchByMessageID(scanner.nextLine()));
+                    break;
+                case 4:
+                    System.out.print("Enter the recipient's cell number: ");
+                    System.out.println(Message.searchByRecipient(scanner.nextLine()));
+                    break;
+                case 5:
+                    System.out.print("Enter the message hash: ");
+                    System.out.println(Message.deleteMessageByHash(scanner.nextLine()));
+                    break;
+                case 6:
+                    System.out.println(Message.storedMessagesReport());
+                    break;
+                case 7:
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Invalid option, please choose 1 to 7.");
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Input helpers
+    // ---------------------------------------------------------------
+
+    private static int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String line = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a whole number.");
+            }
+        }
+    }
+
+    private static int readPositiveInt(String prompt) {
+        int value;
+        do {
+            value = readInt(prompt);
+            if (value <= 0) {
+                System.out.println("Please enter a number greater than 0.");
+            }
+        } while (value <= 0);
+        return value;
+    }
+}
+
+    // ---------------------------------------------------------------
     // Input helpers
     // ---------------------------------------------------------------
 
