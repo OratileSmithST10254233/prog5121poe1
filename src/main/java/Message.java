@@ -509,4 +509,160 @@ public class Message {
         }
     }
 
+    // ---------------------------------------------------------------
+    // Part 3: using the arrays (the "Stored Messages" menu)
+    // ---------------------------------------------------------------
+
+    /** (a) The sender and recipient of every stored message. */
+    public static String displaySenderAndRecipientOfStored() {
+        if (storedMessages.isEmpty()) {
+            return "There are no stored messages.";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Message message : storedMessages) {
+            if (sb.length() > 0) {
+                sb.append(System.lineSeparator());
+            }
+            sb.append("Sender: ").append(message.sender.isBlank() ? "Unknown sender" : message.sender)
+                    .append(" | Recipient: ").append(message.recipient);
+        }
+        return sb.toString();
+    }
+
+    /** (b) The longest stored message (the first one if there is a tie). */
+    public static String longestStoredMessage() {
+        String longest = null;
+        for (Message message : storedMessages) {
+            if (longest == null || message.messageText.length() > longest.length()) {
+                longest = message.messageText;
+            }
+        }
+        return longest == null ? "There are no stored messages." : longest;
+    }
+
+    /** Finds a message by its ID in the sent, stored and disregarded arrays. */
+    public static Message findMessageByID(String id) {
+        String wanted = id == null ? "" : id.trim();
+        List<List<Message>> arrays = List.of(sentMessages, storedMessages, disregardedMessages);
+        for (List<Message> array : arrays) {
+            for (Message message : array) {
+                if (message.messageID.equals(wanted)) {
+                    return message;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** (c) Search for a message ID and display the recipient and message. */
+    public static String searchByMessageID(String id) {
+        Message message = findMessageByID(id);
+        if (message == null) {
+            return "No message was found with the message ID " + (id == null ? "" : id.trim()) + ".";
+        }
+        return "Recipient: " + message.recipient + System.lineSeparator()
+                + "Message: " + message.messageText;
+    }
+
+    /** All the sent or stored messages for one recipient. */
+    public static List<Message> findMessagesByRecipient(String recipient) {
+        String wanted = recipient == null ? "" : recipient.trim();
+        List<Message> found = new ArrayList<>();
+        for (Message message : sentMessages) {
+            if (message.recipient.equals(wanted)) {
+                found.add(message);
+            }
+        }
+        for (Message message : storedMessages) {
+            if (message.recipient.equals(wanted)) {
+                found.add(message);
+            }
+        }
+        return found;
+    }
+
+    /** (d) Search for all the messages sent or stored for a recipient. */
+    public static String searchByRecipient(String recipient) {
+        List<Message> found = findMessagesByRecipient(recipient);
+        if (found.isEmpty()) {
+            return "No messages were found for the recipient " + (recipient == null ? "" : recipient.trim()) + ".";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Message message : found) {
+            if (sb.length() > 0) {
+                sb.append(System.lineSeparator());
+            }
+            sb.append(message.messageText);
+        }
+        return sb.toString();
+    }
+
+    /** (e) Delete a stored (or sent) message using its message hash. */
+    public static String deleteMessageByHash(String hash) {
+        String wanted = hash == null ? "" : hash.trim();
+        Message target = null;
+        boolean wasStored = false;
+        for (Message message : storedMessages) {
+            if (message.messageHash.equalsIgnoreCase(wanted)) {
+                target = message;
+                wasStored = true;
+                break;
+            }
+        }
+        if (target == null) {
+            for (Message message : sentMessages) {
+                if (message.messageHash.equalsIgnoreCase(wanted)) {
+                    target = message;
+                    break;
+                }
+            }
+        }
+        if (target == null) {
+            return "No message was found with the message hash " + wanted + ".";
+        }
+        if (wasStored) {
+            storedMessages.remove(target);
+            saveStoredMessages();
+        } else {
+            sentMessages.remove(target);
+        }
+        target.untrack();
+        return "Message: \"" + target.messageText + "\" successfully deleted.";
+    }
+
+    /** Report of all the sent messages: hash, recipient and message. */
+    public static String sentMessagesReport() {
+        String nl = System.lineSeparator();
+        if (sentMessages.isEmpty()) {
+            return "SENT MESSAGES REPORT" + nl + "There are no sent messages.";
+        }
+        StringBuilder sb = new StringBuilder("SENT MESSAGES REPORT");
+        for (Message message : sentMessages) {
+            sb.append(nl).append(nl)
+                    .append("Message Hash: ").append(message.messageHash).append(nl)
+                    .append("Recipient: ").append(message.recipient).append(nl)
+                    .append("Message: ").append(message.messageText);
+        }
+        return sb.toString();
+    }
+
+    /** (f) Report with the full details of all the stored messages. */
+    public static String storedMessagesReport() {
+        String nl = System.lineSeparator();
+        if (storedMessages.isEmpty()) {
+            return "STORED MESSAGES REPORT" + nl + "There are no stored messages.";
+        }
+        StringBuilder sb = new StringBuilder("STORED MESSAGES REPORT");
+        for (Message message : storedMessages) {
+            sb.append(nl).append(nl)
+                    .append("Message ID: ").append(message.messageID).append(nl)
+                    .append("Message Hash: ").append(message.messageHash).append(nl)
+                    .append("Sender: ").append(message.sender.isBlank() ? "Unknown sender" : message.sender).append(nl)
+                    .append("Recipient: ").append(message.recipient).append(nl)
+                    .append("Message: ").append(message.messageText);
+        }
+        return sb.toString();
+    }
+}
+
 
