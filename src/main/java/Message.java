@@ -330,4 +330,183 @@ public class Message {
         return texts;
     }
 
+    // ---------------------------------------------------------------
+    // Part 3: reading the JSON file back into the stored messages array
+    // ---------------------------------------------------------------
+
+    /**
+     * Reads the JSON file written by storeMessage() into the stored messages
+     * array. Returns how many messages were loaded (0 if there is no file yet).
+     */
+    public static int loadStoredMessages() {
+        for (Message old : storedMessages) {
+            old.untrack();
+        }
+        storedMessages.clear();
+
+        Path path = Path.of(storagePath);
+        if (!Files.exists(path)) {
+            return 0;
+        }
+        try {
+            String json = Files.readString(path, StandardCharsets.UTF_8);
+            for (Map<String, String> fields : new JsonReader(json).readArrayOfObjects()) {
+                int number = 0;
+                try {
+                    number = Integer.parseInt(fields.getOrDefault("messageNumber", "0"));
+                } catch (NumberFormatException e) {
+                    // keep 0 if the number is damaged
+                }
+                Message message = new Message(fields.getOrDefault("messageID", ""), number,
+                        fields.getOrDefault("recipient", ""), fields.getOrDefault("message", ""));
+                message.setSender(fields.getOrDefault("sender", ""));
+                message.track();
+                storedMessages.add(message);
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            System.out.println("Could not read the stored messages from the JSON file: " + e.getMessage());
+            for (Message partial : storedMessages) {
+                partial.untrack();
+            }
+            storedMessages.clear();
+        }
+        return storedMessages.size();
+    }
+
+    /**
+     * A small reader for the JSON this class writes: an array of objects
+     * whose values are strings or numbers. (Written by hand so no extra
+     * library is needed; see json.org for the JSON format.)
+     */
+    private static class JsonReader {
+        private final String text;
+        private int pos = 0;
+
+        JsonReader(String text) {
+            this.text = text;
+        }
+
+        List<Map<String, String>> readArrayOfObjects() {
+            List<Map<String, String>> objects = new ArrayList<>();
+            skipWhitespace();
+            expect('[');
+            skipWhitespace();
+            if (peek() == ']') {
+                pos++;
+                return objects;
+            }
+            while (true) {
+                objects.add(readObject());
+                skipWhitespace();
+                char c = next();
+                if (c == ']') {
+                    return objects;
+                }
+                if (c != ',') {
+                    throw new IllegalArgumentException("expected ',' or ']' at position " + (pos - 1));
+                }
+            }
+        }
+
+        private Map<String, String> readObject() {
+            Map<String, String> fields = new LinkedHashMap<>();
+            skipWhitespace();
+            expect('{');
+            skipWhitespace();
+            if (peek() == '}') {
+                pos++;
+                return fields;
+            }
+            while (true) {
+                skipWhitespace();
+                String key = readString();
+                skipWhitespace();
+                expect(':');
+                skipWhitespace();
+                String value = peek() == '"' ? readString() : readNumberToken();
+                fields.put(key, value);
+                skipWhitespace();
+                char c = next();
+                if (c == '}') {
+                    return fields;
+                }
+                if (c != ',') {
+                    throw new IllegalArgumentException("expected ',' or '}' at position " + (pos - 1));
+                }
+            }
+        }
+
+        private String readString() {
+            expect('"');
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                char c = next();
+                if (c == '"') {
+                    return sb.toString();
+                }
+                if (c != '\\') {
+                    sb.append(c);
+                    continue;
+                }
+                char escaped = next();
+                switch (escaped) {
+                    case '"':  sb.append('"'); break;
+                    case '\\': sb.append('\\'); break;
+                    case '/':  sb.append('/'); break;
+                    case 'n':  sb.append('\n'); break;
+                    case 'r':  sb.append('\r'); break;
+                    case 't':  sb.append('\t'); break;
+                    case 'b':  sb.append('\b'); break;
+                    case 'f':  sb.append('\f'); break;
+                    case 'u':
+                        if (pos + 4 > text.length()) {
+                            throw new IllegalArgumentException("bad \\u escape");
+                        }
+                        sb.append((char) Integer.parseInt(text.substring(pos, pos + 4), 16));
+                        pos += 4;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("bad escape \\" + escaped);
+                }
+            }
+        }
+
+        private String readNumberToken() {
+            int start = pos;
+            while (pos < text.length() && ",}] \n\r\t".indexOf(text.charAt(pos)) < 0) {
+                pos++;
+            }
+            if (start == pos) {
+                throw new IllegalArgumentException("expected a value at position " + pos);
+            }
+            return text.substring(start, pos);
+        }
+
+        private void skipWhitespace() {
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+        }
+
+        private char peek() {
+            if (pos >= text.length()) {
+                throw new IllegalArgumentException("unexpected end of file");
+            }
+            return text.charAt(pos);
+        }
+
+        private char next() {
+            char c = peek();
+            pos++;
+            return c;
+        }
+
+        private void expect(char expected) {
+            char c = next();
+            if (c != expected) {
+                throw new IllegalArgumentException("expected '" + expected + "' at position " + (pos - 1));
+            }
+        }
+    }
+
 
